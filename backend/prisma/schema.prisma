@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// === ПЕРЕЛІЧЕННЯ (Enums) ===
+
+enum Role {
+  GUEST
+  MANAGER
+  ADMIN
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  PAYPAL
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// === ТАБЛИЦІ (Models) ===
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique
+  password_hash String
+  first_name    String
+  last_name     String
+  phone         String?
+  role          Role      @default(GUEST)
+  created_at    DateTime  @default(now())
+
+  // Зв'язки
+  bookings      Booking[]
+  reviews       Review[]
+
+  @@map("users") // Вказуємо, що в БД таблиця називатиметься з маленької літери
+}
+
+model RoomType {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  capacity    Int
+  description String?
+  area_sqm    Int?
+  amenities   Json?    // Зберігаємо зручності у форматі JSON
+  
+  // Зв'язки
+  rooms       Room[]
+
+  @@map("room_types")
+}
+
+model Room {
+  id              String     @id @default(uuid()) @db.Uuid
+  room_type_id    String     @db.Uuid
+  number          String     @unique
+  floor           Int
+  status          RoomStatus @default(AVAILABLE)
+  price_per_night Decimal    @db.Decimal(10, 2)
+  is_active       Boolean    @default(true)
+
+  // Зв'язки
+  room_type       RoomType   @relation(fields: [room_type_id], references: [id])
+  bookings        Booking[]
+  reviews         Review[]
+
+  @@map("rooms")
+}
+
+model Booking {
+  id           String        @id @default(uuid()) @db.Uuid
+  user_id      String        @db.Uuid
+  room_id      String        @db.Uuid
+  check_in     DateTime      @db.Date
+  check_out    DateTime      @db.Date
+  guests_count Int
+  total_price  Decimal       @db.Decimal(10, 2)
+  status       BookingStatus @default(PENDING)
+  created_at   DateTime      @default(now())
+
+  // Зв'язки
+  user         User          @relation(fields: [user_id], references: [id])
+  room         Room          @relation(fields: [room_id], references: [id])
+  payments     Payment[]
+
+  @@map("bookings")
+}
+
+model Payment {
+  id             String        @id @default(uuid()) @db.Uuid
+  booking_id     String        @db.Uuid
+  amount         Decimal       @db.Decimal(10, 2)
+  method         PaymentMethod
+  status         PaymentStatus @default(PENDING)
+  transaction_id String?       @unique
+  paid_at        DateTime?
+
+  // Зв'язки
+  booking        Booking       @relation(fields: [booking_id], references: [id])
+
+  @@map("payments")
+}
+
+model Review {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  room_id    String   @db.Uuid
+  rating     Int
+  comment    String?  @db.Text
+  created_at DateTime @default(now())
+
+  // Зв'язки
+  user       User     @relation(fields: [user_id], references: [id])
+  room       Room     @relation(fields: [room_id], references: [id])
+
+  @@map("reviews")
+}
