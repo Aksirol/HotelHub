@@ -38,6 +38,23 @@ const bookingController = {
         } catch (error) {
             res.status(500).json({ error: 'Помилка сервера' });
         }
+    },
+
+    // Зміна статусу бронювання персоналом
+    async updateStatus(req, res) {
+        try {
+            const { id } = req.params; // Отримуємо ID бронювання з URL
+            const { status } = req.body; // Отримуємо новий статус з тіла запиту
+
+            const updatedBooking = await bookingService.updateBookingStatus(id, status);
+
+            res.status(200).json({
+                message: `Статус бронювання успішно змінено на ${status}`,
+                booking: updatedBooking
+            });
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
     }
 };
 

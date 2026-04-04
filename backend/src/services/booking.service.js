@@ -82,6 +82,30 @@ const bookingService = {
             },
             orderBy: { created_at: 'desc' }
         });
+    },
+
+    // === 4. Оновлення статусу бронювання (для Менеджера/Адміна) ===
+    async updateBookingStatus(booking_id, new_status) {
+        // Перевіряємо, чи існує таке бронювання
+        const booking = await prisma.booking.findUnique({
+            where: { id: booking_id }
+        });
+
+        if (!booking) {
+            throw new Error('Бронювання не знайдено');
+        }
+
+        // Перевіряємо, чи переданий статус є валідним (згідно з нашим enum в БД)
+        const validStatuses = ['PENDING', 'CONFIRMED', 'CHECKED_IN', 'COMPLETED', 'CANCELLED'];
+        if (!validStatuses.includes(new_status)) {
+            throw new Error('Недійсний статус бронювання');
+        }
+
+        // Оновлюємо статус
+        return await prisma.booking.update({
+            where: { id: booking_id },
+            data: { status: new_status }
+        });
     }
 };
 

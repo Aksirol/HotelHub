@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bookingRoutes = require('./routes/booking.routes');
 const paymentRoutes = require('./routes/payment.routes');
+const reviewRoutes = require('./routes/review.routes');
 require('dotenv').config();
 
 // Імпорт маршрутів
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'success', message: 'HotelHub API is running!' });

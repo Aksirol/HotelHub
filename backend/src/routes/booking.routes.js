@@ -17,4 +17,12 @@ router.get('/my', bookingController.getMyBookings);
 // Подивитися всі бронювання готелю
 router.get('/all', requireRoles(['ADMIN', 'MANAGER']), bookingController.getAllBookings);
 
+// Змінити статус бронювання (тільки для MANAGER та ADMIN)
+// Використовуємо метод PATCH, оскільки ми частково оновлюємо ресурс
+router.patch(
+    '/:id/status', 
+    requireRoles(['ADMIN', 'MANAGER']), 
+    bookingController.updateStatus
+);
+
 module.exports = router;
