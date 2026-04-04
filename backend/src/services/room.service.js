@@ -37,6 +37,14 @@ const roomService = {
                 room_type: true // Одразу підтягуємо інформацію про тип кімнати
             }
         });
+    },
+
+    // === 5. Оновлення фотографії кімнати ===
+    async updateRoomImage(roomId, imageUrl) {
+        return await prisma.room.update({
+            where: { id: roomId },
+            data: { image_url: imageUrl }
+        });
     }
 };
 

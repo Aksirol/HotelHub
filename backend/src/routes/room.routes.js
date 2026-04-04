@@ -1,4 +1,5 @@
 const express = require('express');
+const upload = require('../config/upload.config');
 const roomController = require('../controllers/room.controller');
 const { verifyToken, requireRoles } = require('../middlewares/auth.middleware');
 
@@ -14,6 +15,14 @@ router.post(
     verifyToken, 
     requireRoles(['ADMIN']), 
     roomController.createType
+);
+
+router.post(
+    '/:id/image', 
+    verifyToken, 
+    requireRoles(['ADMIN']), 
+    upload.single('room_image'), 
+    roomController.uploadImage
 );
 
 router.post(

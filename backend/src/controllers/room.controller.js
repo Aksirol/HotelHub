@@ -62,6 +62,33 @@ const roomController = {
         } catch (error) {
             res.status(500).json({ error: 'Помилка сервера' });
         }
+    },
+
+    // === Завантаження фото кімнати ===
+    async uploadImage(req, res) {
+        try {
+            const { id } = req.params; // ID кімнати з URL
+            
+            // Якщо файл не завантажився
+            if (!req.file) {
+                return res.status(400).json({ error: 'Будь ласка, завантажте файл' });
+            }
+
+            // Шлях до файлу в Cloudinary автоматично зберігається в req.file.path
+            const imageUrl = req.file.path;
+
+            const updatedRoom = await roomService.updateRoomImage(id, imageUrl);
+
+            // Очищаємо кеш Redis, щоб на фронтенді одразу з'явилося нове фото
+            await redisClient.del('rooms:all');
+
+            res.status(200).json({ 
+                message: 'Фото успішно завантажено', 
+                room: updatedRoom 
+            });
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
     }
 };
 

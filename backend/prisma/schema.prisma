@@ -83,6 +83,7 @@ model Room {
   status          RoomStatus @default(AVAILABLE)
   price_per_night Decimal    @db.Decimal(10, 2)
   is_active       Boolean    @default(true)
+  image_url       String?
 
   // Зв'язки
   room_type       RoomType   @relation(fields: [room_type_id], references: [id])
