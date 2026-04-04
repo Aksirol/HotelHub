@@ -1,3 +1,4 @@
+const hotelEmitter = require('../utils/eventEmitter');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -51,7 +52,7 @@ const bookingService = {
         const total_price = diffDays * Number(room.price_per_night);
 
         // 4. Створення запису в базі даних
-        return await prisma.booking.create({
+        const newBooking = await prisma.booking.create({
             data: {
                 user_id,
                 room_id,
@@ -62,6 +63,18 @@ const bookingService = {
                 status: 'PENDING'
             }
         });
+
+        // Отримуємо email користувача для відправки листа
+        const user = await prisma.user.findUnique({ where: { id: user_id } });
+
+        // ВИПУСКАЄМО ПОДІЮ (Publisher)
+        hotelEmitter.emit('booking_created', {
+            email: user.email,
+            booking: newBooking,
+            roomNumber: room.number
+        });
+
+        return newBooking;
     },
 
     // === 2. Отримання бронювань конкретного користувача (Мій кабінет) ===

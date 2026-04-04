@@ -3,7 +3,9 @@ const cors = require('cors');
 const bookingRoutes = require('./routes/booking.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const reviewRoutes = require('./routes/review.routes');
+
 require('dotenv').config();
+require('./subscribers/notification.observer');
 
 // Імпорт маршрутів
 const authRoutes = require('./routes/auth.routes');
