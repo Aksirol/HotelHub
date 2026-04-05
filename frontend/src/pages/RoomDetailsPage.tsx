@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getRoomById } from '../shared/api/roomApi';
 import { BookRoomForm } from '../features/booking/ui/BookRoomForm';
+import { RoomReviews } from '../widgets/reviews/ui/RoomReviews';
 import { Loader2, ArrowLeft, Users, SquareActivity, Wifi, Tv } from 'lucide-react';
 
 export const RoomDetailsPage = () => {
@@ -100,13 +101,16 @@ export const RoomDetailsPage = () => {
               </div>
               <div className="border-t border-gray-200 my-4"></div>
               
-              {/* ВИКЛИКАЄМО НАШУ ФОРМУ */}
               <BookRoomForm roomId={room.id} pricePerNight={Number(room.price_per_night)} />
               
             </div>
           </div>
         </div>
       </div>
+
+      {/* НОВИЙ БЛОК ВІДГУКІВ ТУТ */}
+      <RoomReviews roomId={room.id} />
+
     </div>
   );
 };
