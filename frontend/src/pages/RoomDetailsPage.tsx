@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getRoomById } from '../shared/api/roomApi';
+import { BookRoomForm } from '../features/booking/ui/BookRoomForm';
 import { Loader2, ArrowLeft, Users, SquareActivity, Wifi, Tv } from 'lucide-react';
 
 export const RoomDetailsPage = () => {
@@ -99,11 +100,9 @@ export const RoomDetailsPage = () => {
               </div>
               <div className="border-t border-gray-200 my-4"></div>
               
-              <p className="text-center text-gray-500 mb-4">Тут буде форма вибору дат...</p>
+              {/* ВИКЛИКАЄМО НАШУ ФОРМУ */}
+              <BookRoomForm roomId={room.id} pricePerNight={Number(room.price_per_night)} />
               
-              <button disabled className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl opacity-50 cursor-not-allowed">
-                Забронювати
-              </button>
             </div>
           </div>
         </div>
