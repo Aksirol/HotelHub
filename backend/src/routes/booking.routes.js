@@ -14,8 +14,8 @@ router.post('/', bookingController.createBooking);
 router.get('/my', bookingController.getMyBookings);
 
 // === Маршрути для персоналу (MANAGER, ADMIN) ===
-// Подивитися всі бронювання готелю
-router.get('/all', requireRoles(['ADMIN', 'MANAGER']), bookingController.getAllBookings);
+// Отримати всі бронювання (тільки для ADMIN та MANAGER)
+router.get('/', verifyToken, requireRoles(['ADMIN', 'MANAGER']), bookingController.getAllBookings);
 
 // Змінити статус бронювання (тільки для MANAGER та ADMIN)
 // Використовуємо метод PATCH, оскільки ми частково оновлюємо ресурс

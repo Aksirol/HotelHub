@@ -30,13 +30,13 @@ const bookingController = {
         }
     },
 
-    // Перегляд всіх бронювань (для персоналу)
+    // Отримання всіх бронювань
     async getAllBookings(req, res) {
         try {
             const bookings = await bookingService.getAllBookings();
             res.status(200).json(bookings);
         } catch (error) {
-            res.status(500).json({ error: 'Помилка сервера' });
+            res.status(500).json({ error: 'Помилка сервера при завантаженні бронювань' });
         }
     },
 

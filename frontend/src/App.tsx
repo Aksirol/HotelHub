@@ -6,6 +6,7 @@ import { RoomsPage } from './pages/RoomsPage';
 import { LoginPage } from './pages/LoginPage';
 import { RoomDetailsPage } from './pages/RoomDetailsPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { AdminBookingsPage } from './pages/AdminBookingsPage';
 
 // Створюємо клієнт для React Query
 const queryClient = new QueryClient({
@@ -28,6 +29,7 @@ export const App = () => {
             <Route path="rooms" element={<RoomsPage />} />
             <Route path="rooms/:id" element={<RoomDetailsPage />} />
             <Route path="login" element={<LoginPage />} />
+            <Route path="admin/bookings" element={<AdminBookingsPage />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="*" element={<div className="text-center py-20 text-red-500 text-2xl font-bold">404 - Сторінку не знайдено</div>} />
           </Route>

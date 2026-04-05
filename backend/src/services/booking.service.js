@@ -89,11 +89,17 @@ const bookingService = {
     // === 3. Отримання всіх бронювань (для Адміна/Менеджера) ===
     async getAllBookings() {
         return await prisma.booking.findMany({
-            include: { 
-                user: { select: { first_name: true, last_name: true, email: true } },
-                room: true 
+            include: {
+                room: {
+                    include: {
+                        room_type: true // Підтягуємо дані про кімнату та її тип
+                    }
+                },
+                user: {
+                    select: { id: true, first_name: true, last_name: true, email: true } // Підтягуємо дані клієнта
+                }
             },
-            orderBy: { created_at: 'desc' }
+            orderBy: { created_at: 'desc' } // Найновіші зверху
         });
     },
 

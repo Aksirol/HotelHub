@@ -24,6 +24,14 @@ export const MainLayout = () => {
             {/* Умовний рендеринг: перевіряємо, чи авторизований користувач */}
             {isAuth ? (
               <div className="flex items-center gap-4">
+                
+                {/* Виводимо пункт меню для персоналу */}
+                {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                  <Link to="/admin/bookings" className="text-purple-600 hover:text-purple-800 font-bold bg-purple-50 px-3 py-1.5 rounded-md">
+                    Управління
+                  </Link>
+                )}
+
                 <Link to="/dashboard" className="text-gray-600 hover:text-blue-600 font-medium">Кабінет</Link>
                 <span className="text-sm font-semibold text-gray-800 bg-gray-100 px-3 py-1 rounded-full">
                   {user?.first_name} {user?.last_name}
