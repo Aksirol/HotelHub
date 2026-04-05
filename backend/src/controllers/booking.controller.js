@@ -10,6 +10,12 @@ const bookingController = {
 
             const newBooking = await bookingService.createBooking(user_id, bookingData);
             
+            // 🔥 WEBSOCKET: Сповіщаємо адмінів про нове бронювання
+            const io = req.app.get('io');
+            if (io) {
+                io.to('admin_room').emit('admin_dashboard_update');
+            }
+            
             res.status(201).json({
                 message: 'Бронювання успішно створено',
                 booking: newBooking
@@ -47,6 +53,12 @@ const bookingController = {
             const { status } = req.body; // Отримуємо новий статус з тіла запиту
 
             const updatedBooking = await bookingService.updateBookingStatus(id, status);
+
+            // 🔥 WEBSOCKET: Сповіщаємо про зміну статусу
+            const io = req.app.get('io');
+            if (io) {
+                io.to('admin_room').emit('admin_dashboard_update');
+            }
 
             res.status(200).json({
                 message: `Статус бронювання успішно змінено на ${status}`,

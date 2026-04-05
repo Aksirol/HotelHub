@@ -31,11 +31,49 @@ const roomService = {
     },
 
     // === 4. Отримання всіх кімнат (для каталогу на Frontend) ===
-    async getAllRooms() {
+    // Отримання всіх кімнат з підтримкою фільтрів
+    async getAllRooms(filters = {}) {
+        const { guests, minPrice, maxPrice, checkIn, checkOut } = filters;
+
+        // Базове правило: кімната має бути активною
+        let whereClause = { is_active: true };
+
+        // 1. Фільтр за кількістю гостей (зв'язок з таблицею RoomType)
+        if (guests) {
+            whereClause.room_type = {
+                capacity: { gte: parseInt(guests) } // gte - Greater Than or Equal (Більше або дорівнює)
+            };
+        }
+
+        // 2. Фільтр за ціною
+        if (minPrice || maxPrice) {
+            whereClause.price_per_night = {};
+            if (minPrice) whereClause.price_per_night.gte = parseFloat(minPrice);
+            if (maxPrice) whereClause.price_per_night.lte = parseFloat(maxPrice);
+        }
+
+        // 3. Фільтр за доступністю дат (найкрутіша частина)
+        // Шукаємо кімнати, у яких НЕМАЄ бронювань, що перетинаються з нашими датами
+        if (checkIn && checkOut) {
+            whereClause.bookings = {
+                none: {
+                    status: { in: ['CONFIRMED', 'CHECKED_IN', 'PENDING'] },
+                    OR: [
+                        {
+                            // Перетин дат: заїзд нового раніше за виїзд старого, 
+                            // і виїзд нового пізніше за заїзд старого
+                            check_in: { lt: new Date(checkOut) },
+                            check_out: { gt: new Date(checkIn) }
+                        }
+                    ]
+                }
+            };
+        }
+
         return await prisma.room.findMany({
-            include: {
-                room_type: true // Одразу підтягуємо інформацію про тип кімнати
-            }
+            where: whereClause,
+            include: { room_type: true },
+            orderBy: { price_per_night: 'asc' } // Сортуємо від найдешевших
         });
     },
 

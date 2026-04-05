@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { apiClient } from '../shared/api/apiClient';
 import { useAuthStore } from '../shared/store/authStore.ts';
@@ -75,6 +75,14 @@ export const LoginPage = () => {
           Увійти
         </button>
       </form>
+
+      <div className="mt-6 text-center text-sm text-gray-600">
+        Ще не зареєстровані?{' '}
+        <Link to="/register" className="text-blue-600 font-bold hover:underline">
+          Створити акаунт
+        </Link>
+      </div>
+
     </div>
   );
 };

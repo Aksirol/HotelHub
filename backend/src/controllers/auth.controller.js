@@ -4,17 +4,21 @@ const authController = {
     // Обробник для реєстрації
     async register(req, res) {
         try {
-            // Отримуємо дані з тіла запиту
-            const userData = req.body; 
-            const newUser = await authService.registerUser(userData);
+            // 🚨 БЕЗПЕКА: Витягуємо лише дозволені поля, повністю ігноруючи можливе поле 'role' від хакера
+            const { email, password, first_name, last_name, phone } = req.body;
             
-            // Не відправляємо хеш пароля клієнту з міркувань безпеки
-            delete newUser.password_hash;
+            // Формуємо об'єкт для бази даних, жорстко задаючи роль GUEST
+            const safeUserData = {
+                email,
+                password,
+                first_name,
+                last_name,
+                phone,
+                role: 'GUEST' // Жоден новий користувач не може стати адміном при реєстрації
+            };
 
-            res.status(201).json({
-                message: 'Користувача успішно зареєстровано',
-                user: newUser
-            });
+            const user = await authService.registerUser(safeUserData);
+            res.status(201).json({ message: 'Користувача успішно зареєстровано' });
         } catch (error) {
             res.status(400).json({ error: error.message });
         }

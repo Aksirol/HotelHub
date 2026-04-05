@@ -4,18 +4,39 @@ import { useEffect } from 'react';
 import { getAllBookings, updateBookingStatus } from '../shared/api/bookingApi';
 import { useAuthStore } from '../shared/store/authStore';
 import { Loader2, Settings } from 'lucide-react';
+import { socket } from '../shared/api/socket';
 
 export const AdminBookingsPage = () => {
   const { user, isAuth } = useAuthStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Перевірка прав доступу
   useEffect(() => {
     if (!isAuth || (user?.role !== 'ADMIN' && user?.role !== 'MANAGER')) {
       navigate('/');
     }
   }, [isAuth, user, navigate]);
+
+  // 🔥 2. НОВИЙ USE-EFFECT ДЛЯ WEBSOCKETS
+  useEffect(() => {
+    if (user?.role === 'ADMIN' || user?.role === 'MANAGER') {
+      socket.connect(); // Підключаємося
+      socket.emit('join_admin_room'); // Заходимо в кімнату адмінів
+
+      // Слухаємо подію оновлення
+      socket.on('admin_dashboard_update', () => {
+        console.log('Отримано оновлення через WebSocket!');
+        // React Query автоматично зробить запит у фоні та оновить таблицю!
+        queryClient.invalidateQueries({ queryKey: ['all-bookings'] });
+      });
+
+      // Прибираємо за собою, коли користувач йде зі сторінки
+      return () => {
+        socket.off('admin_dashboard_update');
+        socket.disconnect();
+      };
+    }
+  }, [user, queryClient]);
 
   const { data: bookings, isLoading } = useQuery({
     queryKey: ['all-bookings'],

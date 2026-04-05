@@ -9,6 +9,11 @@ const paymentController = {
 
             const result = await paymentService.processPayment(user_id, paymentData);
 
+            const io = req.app.get('io');
+            if (io) {
+                io.to('admin_room').emit('admin_dashboard_update');
+            }
+
             res.status(200).json({
                 message: 'Оплату успішно проведено',
                 data: result

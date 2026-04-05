@@ -2,29 +2,46 @@ const roomService = require('../services/room.service');
 const redisClient = require('../config/redis');
 
 const roomController = {
-    // === Отримання всіх кімнат (З КЕШУВАННЯМ) ===
+    // === Отримання всіх кімнат (З КЕШУВАННЯМ ТА РОЗУМНИМИ ФІЛЬТРАМИ) ===
     async getRooms(req, res) {
         try {
-            const cacheKey = 'rooms:all';
+            // 1. Збираємо параметри з URL (якщо вони є)
+            const filters = {
+                guests: req.query.guests,
+                minPrice: req.query.minPrice,
+                maxPrice: req.query.maxPrice,
+                checkIn: req.query.checkIn,
+                checkOut: req.query.checkOut,
+            };
 
-            // 1. Перевіряємо, чи є дані в кеші Redis
+            // 2. Перевіряємо, чи є хоча б один активний фільтр
+            const hasFilters = Object.values(filters).some(value => value !== undefined && value !== '');
+
+            // 3. Якщо користувач шукає за фільтрами — оминаємо кеш (щоб не засмічувати пам'ять Redis)
+            if (hasFilters) {
+                console.log('🔍 Використовується пошук з фільтрами (Дані з PostgreSQL)');
+                const rooms = await roomService.getAllRooms(filters);
+                return res.status(200).json(rooms);
+            }
+
+            // 4. === ЛОГІКА ДЛЯ БАЗОВОГО СПИСКУ (БЕЗ ФІЛЬТРІВ) ===
+            const cacheKey = 'rooms:all';
             const cachedRooms = await redisClient.get(cacheKey);
 
             if (cachedRooms) {
                 console.log('⚡ Дані отримано з кешу Redis');
-                // Дані в Redis зберігаються як рядок, тому перетворюємо їх назад в об'єкт JSON
                 return res.status(200).json(JSON.parse(cachedRooms));
             }
 
-            // 2. Якщо в кеші пусто, беремо дані з PostgreSQL
-            console.log('🗄️ Дані отримано з бази даних PostgreSQL');
-            const rooms = await roomService.getAllRooms();
+            console.log('🗄️ Дані отримано з бази даних PostgreSQL (Повний список)');
+            const rooms = await roomService.getAllRooms(filters); // Тут фільтри пусті
 
-            // 3. Зберігаємо результат у Redis на 1 годину (3600 секунд)
+            // Зберігаємо результат у Redis на 1 годину
             await redisClient.setEx(cacheKey, 3600, JSON.stringify(rooms));
 
             res.status(200).json(rooms);
         } catch (error) {
+            console.error('Помилка при отриманні кімнат:', error);
             res.status(500).json({ error: 'Помилка сервера' });
         }
     },
