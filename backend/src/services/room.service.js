@@ -45,6 +45,14 @@ const roomService = {
             where: { id: roomId },
             data: { image_url: imageUrl }
         });
+    },
+
+    // Отримання однієї кімнати за ID
+    async getRoomById(id) {
+        return await prisma.room.findUnique({
+            where: { id },
+            include: { room_type: true } // Підтягуємо дані про тип кімнати
+        });
     }
 };
 

@@ -8,6 +8,8 @@ const router = express.Router();
 // === Публічні маршрути (для гостей) ===
 router.get('/', roomController.getRooms);
 router.get('/types', roomController.getTypes);
+// Отримати одну кімнату за ID
+router.get('/:id', roomController.getRoom);
 
 // === Захищені маршрути (тільки для ADMIN) ===
 router.post(

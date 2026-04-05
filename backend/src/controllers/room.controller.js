@@ -89,6 +89,19 @@ const roomController = {
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
+    },
+
+    // Отримання однієї кімнати
+    async getRoom(req, res) {
+        try {
+            const room = await roomService.getRoomById(req.params.id);
+            if (!room) {
+                return res.status(404).json({ error: 'Кімнату не знайдено' });
+            }
+            res.status(200).json(room);
+        } catch (error) {
+            res.status(500).json({ error: 'Помилка сервера' });
+        }
     }
 };
 
