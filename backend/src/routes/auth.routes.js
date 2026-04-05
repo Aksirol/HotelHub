@@ -30,7 +30,7 @@ const router = express.Router();
  * 201:
  * description: Користувача успішно зареєстровано
  * 400:
- * description: Помилка реєстрації (наприклад, email вже існує)
+ * description: Помилка реєстрації
  */
 router.post('/register', authController.register);
 
@@ -38,7 +38,7 @@ router.post('/register', authController.register);
  * @swagger
  * /api/auth/login:
  * post:
- * summary: Вхід у систему (отримання JWT токена)
+ * summary: Вхід у систему
  * tags: [Auth]
  * requestBody:
  * required: true
@@ -53,7 +53,7 @@ router.post('/register', authController.register);
  * type: string
  * responses:
  * 200:
- * description: Успішний вхід, повертає токен
+ * description: Успішний вхід
  * 401:
  * description: Невірний email або пароль
  */
