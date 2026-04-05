@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { getMyBookings } from '../shared/api/bookingApi';
+import { processPayment } from '../shared/api/paymentApi';
 import { useAuthStore } from '../shared/store/authStore';
 import { Loader2, Calendar, CreditCard, Clock } from 'lucide-react';
 
@@ -21,6 +22,22 @@ export const DashboardPage = () => {
     queryKey: ['my-bookings'],
     queryFn: getMyBookings,
     enabled: isAuth, // Робимо запит тільки якщо користувач авторизований
+  });
+
+  // Отримуємо доступ до кешу React Query
+  const queryClient = useQueryClient();
+
+  // Налаштовуємо мутацію для оплати
+  const paymentMutation = useMutation({
+    mutationFn: (bookingId: string) => processPayment(bookingId, 'CREDIT_CARD'),
+    onSuccess: () => {
+      // Автоматично оновлюємо список бронювань після успішної оплати!
+      queryClient.invalidateQueries({ queryKey: ['my-bookings'] });
+      alert('Оплату успішно проведено! Статус оновлено.');
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.error || 'Сталася помилка під час оплати');
+    }
   });
 
   if (!isAuth || !user) return null;
@@ -113,11 +130,23 @@ export const DashboardPage = () => {
                 {getStatusBadge(booking.status)}
               </div>
 
-              {/* Кнопка оплати буде доступна тільки якщо статус PENDING */}
+              {/* Кнопка оплати */}
               {booking.status === 'PENDING' && (
-                <button className="w-full md:w-auto mt-2 bg-green-50 text-green-600 font-semibold px-4 py-2 rounded-lg border border-green-200 hover:bg-green-600 hover:text-white transition-colors flex items-center justify-center gap-2">
-                  <CreditCard className="w-4 h-4" />
-                  Оплатити
+                <button 
+                  onClick={() => paymentMutation.mutate(booking.id)}
+                  disabled={paymentMutation.isPending}
+                  className={`w-full md:w-auto mt-2 font-semibold px-4 py-2 rounded-lg border transition-colors flex items-center justify-center gap-2 ${
+                    paymentMutation.isPending 
+                      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                      : 'bg-green-50 text-green-600 border-green-200 hover:bg-green-600 hover:text-white'
+                  }`}
+                >
+                  {paymentMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <CreditCard className="w-4 h-4" />
+                  )}
+                  {paymentMutation.isPending ? 'Обробка...' : 'Оплатити'}
                 </button>
               )}
             </div>
